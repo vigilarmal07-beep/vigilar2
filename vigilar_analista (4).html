@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VigiLar Analista — Relatório de Ocupação</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #191c26;
+    --surface2: #21253a;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8eaf0;
+    --muted: #7c8099;
+    --accent: #4f7fff;
+    --accent2: #7b5cf0;
+    --green: #22c97a;
+    --red: #f05252;
+    --amber: #f0a500;
+    --font-head: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.6; min-height: 100vh; }
+
+  /* NAV */
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 60px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 100; }
+  .nav-logo { font-family: var(--font-head); font-size: 26px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+  .nav-logo-icon { width: 30px; height: 30px; flex-shrink: 0; }
+  .nav-logo .logo-lar { color: var(--accent); }
+  .nav-tabs { display: flex; gap: 4px; }
+  .tab-btn { background: none; border: none; color: var(--muted); font-family: var(--font-body); font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all .2s; }
+  .tab-btn:hover { color: var(--text); background: var(--surface); }
+  .tab-btn.active { color: var(--accent); background: rgba(79,127,255,0.12); }
+
+  /* PAGES */
+  .page { display: none; padding: 2rem; max-width: 900px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* TYPOGRAPHY */
+  h1 { font-family: var(--font-head); font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+  h2 { font-family: var(--font-head); font-size: 18px; font-weight: 600; margin-bottom: 1rem; }
+  h3 { font-family: var(--font-head); font-size: 15px; font-weight: 600; margin-bottom: .5rem; }
+  .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 2rem; }
+
+  /* CARDS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; }
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) { .card-grid { grid-template-columns: 1fr; } }
+
+  /* FORMS */
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  input[type=text], input[type=number], input[type=email], select, textarea {
+    width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius-sm);
+    color: var(--text); font-family: var(--font-body); font-size: 14px; padding: 10px 14px; outline: none; transition: border .2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  .form-row { margin-bottom: 1rem; }
+
+  /* WIZARD (cadastro em etapas) */
+  .wizard-steps { display: flex; align-items: center; margin-bottom: 1.75rem; }
+  .wizard-step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
+  .wizard-step span { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .wizard-step.active span { color: var(--text); font-weight: 500; }
+  .wizard-step.done span { color: var(--green); }
+  .wizard-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--muted); transition: all .2s; }
+  .wizard-step.active .wizard-dot { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .wizard-step.done .wizard-dot { background: var(--green); border-color: var(--green); color: #fff; }
+  .wizard-line { flex: 1; height: 2px; background: var(--border2); margin: 0 6px 20px; }
+  .wizard-panel { display: none; }
+  .wizard-panel.active { display: block; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: var(--radius-sm); border: none; font-family: var(--font-body); font-size: 14px; font-weight: 500; cursor: pointer; transition: all .2s; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #3d6be8; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: rgba(240,82,82,0.15); color: var(--red); border: 1px solid rgba(240,82,82,0.3); }
+  .btn-danger:hover { background: rgba(240,82,82,0.25); }
+  .btn-success { background: rgba(34,201,122,0.15); color: var(--green); border: 1px solid rgba(34,201,122,0.3); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* BADGES / STATUS */
+  .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+  .badge-green { background: rgba(34,201,122,0.15); color: var(--green); }
+  .badge-red { background: rgba(240,82,82,0.15); color: var(--red); }
+  .badge-amber { background: rgba(240,165,0,0.15); color: var(--amber); }
+  .badge-blue { background: rgba(79,127,255,0.15); color: var(--accent); }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* CAMERA */
+  .camera-wrap { position: relative; background: #000; border-radius: var(--radius); overflow: hidden; width: 100%; max-width: 260px; height: 200px; margin: 0 auto; }
+  .camera-wrap video, .camera-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .camera-overlay { position: absolute; inset: 0; border: 2px solid rgba(79,127,255,0.5); border-radius: var(--radius); pointer-events: none; }
+  .face-guide { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-55%); width: 90px; height: 115px; border: 2px dashed rgba(79,127,255,0.6); border-radius: 50%; pointer-events: none; }
+
+  /* STATUS STEPS */
+  .steps { display: flex; flex-direction: column; gap: 8px; margin: 1rem 0; }
+  .step { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--surface2); border-radius: var(--radius-sm); font-size: 13px; border: 1px solid var(--border); }
+  .step-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .step-pending { background: rgba(124,128,153,0.2); color: var(--muted); }
+  .step-loading { background: rgba(79,127,255,0.2); color: var(--accent); animation: pulse 1s infinite; }
+  .step-ok { background: rgba(34,201,122,0.2); color: var(--green); }
+  .step-fail { background: rgba(240,82,82,0.2); color: var(--red); }
+  @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.5 } }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 12px; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border2); white-space: nowrap; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* MORADOR CARD */
+  .morador-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+  .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: var(--surface); flex-shrink: 0; }
+  .avatar-placeholder { width: 48px; height: 48px; border-radius: 50%; background: rgba(79,127,255,0.2); display: flex; align-items: center; justify-content: center; color: var(--accent); font-family: var(--font-head); font-size: 16px; font-weight: 700; flex-shrink: 0; }
+  .morador-info { flex: 1; }
+  .morador-name { font-weight: 600; font-size: 14px; }
+  .morador-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* STATS ROW */
+  .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  @media (max-width: 600px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; }
+  .stat-value { font-family: var(--font-head); font-size: 26px; font-weight: 700; line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* ALERTA */
+  .alert { border-left: 3px solid var(--amber); background: rgba(240,165,0,0.07); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 12px 14px; margin-bottom: 8px; }
+  .alert-title { font-size: 13px; font-weight: 600; color: var(--amber); }
+  .alert-desc { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+  /* RESULT BOX */
+  .result-box { border-radius: var(--radius); padding: 1.5rem; text-align: center; margin-top: 1rem; }
+  .result-box.approved { background: rgba(34,201,122,0.08); border: 1px solid rgba(34,201,122,0.3); }
+  .result-box.denied { background: rgba(240,82,82,0.08); border: 1px solid rgba(240,82,82,0.3); }
+  .result-icon { font-size: 40px; margin-bottom: .5rem; }
+  .result-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; }
+  .result-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* GPS INDICATOR */
+  .gps-box { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; }
+  .gps-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+  .gps-dot.active { background: var(--green); animation: pulse 1.5s infinite; }
+
+  /* PRESENÇA BAR */
+  /* PRESENÇA: ver renderPadroes() / desenharGraficoPresenca() no JS — usa canvas */
+
+  /* TOAST */
+  #toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius); padding: 12px 18px; font-size: 14px; z-index: 999; opacity: 0; transform: translateY(10px); transition: all .3s; pointer-events: none; }
+  #toast.show { opacity: 1; transform: none; }
+
+  /* SECTION HEADER */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+
+  select option { background: var(--surface); }
+
+  .empty-state { text-align: center; padding: 3rem; color: var(--muted); font-size: 14px; }
+
+  .tag { font-size: 11px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; padding: 2px 7px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <svg class="nav-logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 15.5L16 6L27 15.5" stroke="#4f7fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M8 13.5V25C8 25.5523 8.44772 26 9 26H23C23.5523 26 24 25.5523 24 25V13.5" stroke="#4f7fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M13 26V19C13 18.4477 13.4477 18 14 18H18C18.5523 18 19 18.4477 19 19V26" stroke="#4f7fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>Vigi<span class="logo-lar">Lar</span></span>
+  </div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="showPage('relatorio')">Relatório</button>
+  </div>
+</nav>
+
+<!-- ===================== PAGE: RELATÓRIO ===================== -->
+<div id="page-relatorio" class="page active">
+  <h1>Relatório de ocupação</h1>
+  <p class="subtitle">Painel para análise humana. O sistema apenas exibe padrões — um agente decide as ações.</p>
+
+  <div class="card" style="margin-bottom:1.5rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <h3 style="margin-bottom:4px">☁️ Sincronização automática</h3>
+        <p id="sync-indicator" style="font-size:13px;font-weight:500;margin:0;color:var(--muted)">☁️ Sincronização desativada — clique em Configurar</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" onclick="atualizarAgora()" style="font-size:13px">🔄 Atualizar agora</button>
+        <button class="btn btn-primary" onclick="configurarSincronizacao()" style="font-size:13px">Configurar</button>
+      </div>
+    </div>
+    <p id="importar-status" style="font-size:12px;color:var(--muted);margin-top:10px"></p>
+  </div>
+
+  <div class="stats-row" id="stats-row">
+    <div class="stat"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Check-ins totais</div></div>
+    <div class="stat"><div class="stat-value" style="color:var(--green)" id="stat-aprovados">0</div><div class="stat-label">Aprovados</div></div>
+    <div class="stat"><div class="stat-value" style="color:var(--red)" id="stat-negados">0</div><div class="stat-label">Negados</div></div>
+    <div class="stat"><div class="stat-value" style="color:var(--amber)" id="stat-alertas">0</div><div class="stat-label">Alertas ativos</div></div>
+  </div>
+
+  <div class="section-header">
+    <h2 style="margin:0">Alertas para análise</h2>
+    <span class="tag">somente humano decide</span>
+  </div>
+  <div id="alertas-container" style="margin-bottom:1.5rem">
+    <div class="empty-state">Sem alertas no momento.</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-header">
+    <h2 style="margin:0">Padrão de presença por morador</h2>
+    <button class="btn btn-secondary" onclick="exportarCSV()" style="font-size:13px;padding:6px 14px">Exportar CSV</button>
+  </div>
+  <div id="padroes-container">
+    <div class="empty-state">Cadastre moradores e realize check-ins para ver os padrões.</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-header">
+    <h2 style="margin:0">Histórico completo</h2>
+    <select id="filtro-morador" onchange="renderRelatorio()" style="width:auto;font-size:13px;padding:6px 10px">
+      <option value="">Todos os moradores</option>
+    </select>
+  </div>
+  <div class="card" style="padding:0">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data / Hora</th>
+            <th>Morador</th>
+            <th>Rosto</th>
+            <th>GPS</th>
+            <th>Distância</th>
+            <th>Resultado</th>
+            <th>IA: observação</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-historico">
+          <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Nenhum registro ainda.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// ESTADO GLOBAL
+// ============================================================
+let moradores = JSON.parse(localStorage.getItem('vl_moradores') || '[]');
+let checkins  = JSON.parse(localStorage.getItem('vl_checkins')  || '[]');
+
+let streams = {};
+let fotoRef = null;       // base64 da foto de cadastro
+let selfieCheckin = null; // base64 da selfie de check-in
+let gpsAtual = null;
+
+const RAIO_METROS = 15;
+
+// ============================================================
+// NAVEGAÇÃO
+// ============================================================
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.toLowerCase().includes(id.slice(0,3))) b.classList.add('active'); });
+  if (id === 'checkin') renderSelMorador();
+  if (id === 'relatorio') renderRelatorio();
+}
+
+// ============================================================
+// CÂMERA
+// ============================================================
+async function startCam(ctx) {
+  try {
+    if (streams[ctx]) { streams[ctx].getTracks().forEach(t => t.stop()); }
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+    streams[ctx] = stream;
+    const vid = document.getElementById('video-' + ctx);
+    const cnv = document.getElementById('canvas-' + ctx);
+    vid.srcObject = stream;
+    vid.style.display = 'block';
+    cnv.style.display = 'none';
+    toast('Câmera ativada');
+  } catch(e) {
+    toast('Não foi possível acessar a câmera: ' + e.message);
+  }
+}
+
+function captureFrame(ctx) {
+  const vid = document.getElementById('video-' + ctx);
+  const cnv = document.getElementById('canvas-' + ctx);
+  cnv.width = vid.videoWidth || 640;
+  cnv.height = vid.videoHeight || 480;
+  const ctx2 = cnv.getContext('2d');
+  ctx2.drawImage(vid, 0, 0);
+  if (streams[ctx]) { streams[ctx].getTracks().forEach(t => t.stop()); }
+  vid.style.display = 'none';
+  cnv.style.display = 'block';
+  return cnv.toDataURL('image/jpeg', 0.85).split(',')[1];
+}
+
+function snapCadastro() {
+  try {
+    fotoRef = captureFrame('cadastro');
+    document.getElementById('foto-status').textContent = 'Foto capturada com sucesso.';
+    document.getElementById('foto-status').style.color = 'var(--green)';
+  } catch(e) { toast('Ligue a câmera primeiro.'); }
+}
+
+function snapCheckin() {
+  try {
+    selfieCheckin = captureFrame('checkin');
+    toast('Selfie capturada');
+  } catch(e) { toast('Ligue a câmera primeiro.'); }
+}
+
+// ============================================================
+// GPS
+// ============================================================
+function setGPSOk(lat, lon, label) {
+  gpsAtual = { lat, lon, acc: 0 };
+  const dot = document.getElementById('gps-dot');
+  const txt = document.getElementById('gps-text');
+  dot.className = 'gps-dot active';
+  txt.textContent = label || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+  txt.style.color = 'var(--green)';
+}
+
+function setGPSErro(msg) {
+  const dot = document.getElementById('gps-dot');
+  const txt = document.getElementById('gps-text');
+  dot.className = 'gps-dot';
+  txt.style.color = 'var(--amber)';
+  txt.textContent = msg;
+  document.getElementById('gps-manual-box').style.display = 'block';
+}
+
+function captureGPS() {
+  const dot = document.getElementById('gps-dot');
+  const txt = document.getElementById('gps-text');
+  if (!navigator.geolocation) {
+    setGPSErro('GPS indisponível neste navegador. Use a entrada manual.');
+    return;
+  }
+  dot.className = 'gps-dot active';
+  txt.textContent = 'Obtendo localização...';
+  txt.style.color = 'var(--accent)';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      setGPSOk(pos.coords.latitude, pos.coords.longitude,
+        `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)} (±${Math.round(pos.coords.accuracy)}m)`);
+      toast('GPS capturado com sucesso!');
+    },
+    err => {
+      const msgs = {1:'Permissão negada pelo navegador.',2:'Posição indisponível.',3:'Tempo esgotado.'};
+      setGPSErro((msgs[err.code] || err.message) + ' Use a entrada manual abaixo.');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+function toggleGPSManual() {
+  const box = document.getElementById('gps-manual-box');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function usarGPSManual() {
+  const lat = parseFloat(document.getElementById('gps-lat-manual').value);
+  const lon = parseFloat(document.getElementById('gps-lon-manual').value);
+  if (isNaN(lat) || isNaN(lon)) { toast('Preencha latitude e longitude.'); return; }
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) { toast('Coordenadas inválidas.'); return; }
+  setGPSOk(lat, lon, `${lat.toFixed(5)}, ${lon.toFixed(5)} (manual)`);
+  document.getElementById('gps-manual-box').style.display = 'none';
+  toast('Localização manual definida!');
+}
+
+function simularGPSDoMorador() {
+  const moradorId = parseInt(document.getElementById('sel-morador').value);
+  if (!moradorId) { toast('Selecione um morador primeiro.'); return; }
+  const morador = moradores.find(m => m.id === moradorId);
+  if (!morador) return;
+  const latSim = morador.lat + (Math.random() - 0.5) * 0.0003;
+  const lonSim = morador.lon + (Math.random() - 0.5) * 0.0003;
+  setGPSOk(latSim, lonSim, `Simulado no endereço (~${Math.round(Math.random()*40+10)}m)`);
+  document.getElementById('gps-manual-box').style.display = 'none';
+  toast('GPS simulado no endereço do morador!');
+}
+
+function getLocationForCadastro() {
+  const st = document.getElementById('cad-loc-status');
+  if (!navigator.geolocation) {
+    st.textContent = 'GPS indisponível. Digite as coordenadas manualmente nos campos acima.';
+    st.style.color = 'var(--amber)'; return;
+  }
+  st.textContent = 'Obtendo localização...';
+  st.style.color = 'var(--muted)';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      document.getElementById('cad-lat').value = pos.coords.latitude.toFixed(6);
+      document.getElementById('cad-lon').value = pos.coords.longitude.toFixed(6);
+      st.textContent = `Capturado: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+      st.style.color = 'var(--green)';
+    },
+    err => {
+      st.textContent = 'GPS bloqueado. Digite as coordenadas manualmente. Dica: abra o Google Maps, clique no endereço e copie a latitude e longitude.';
+      st.style.color = 'var(--amber)';
+    },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
+// ============================================================
+// CADASTRO
+// ============================================================
+// ============================================================
+// WIZARD DE CADASTRO (etapas)
+// ============================================================
+function irParaEtapa(n) {
+  document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('wizard-panel-' + n).classList.add('active');
+  document.querySelectorAll('.wizard-step').forEach(s => {
+    const step = parseInt(s.dataset.step);
+    s.classList.toggle('active', step === n);
+    s.classList.toggle('done', step < n);
+  });
+}
+
+function wizardProximo(etapaAtual) {
+  if (etapaAtual === 1) {
+    const nome = document.getElementById('cad-nome').value.trim();
+    const cpf = document.getElementById('cad-cpf').value.trim();
+    if (!nome) { toast('Preencha o nome.'); return; }
+    if (!cpf)  { toast('Preencha o CPF.'); return; }
+  }
+  if (etapaAtual === 2) {
+    const end = document.getElementById('cad-end').value.trim();
+    const lat = parseFloat(document.getElementById('cad-lat').value);
+    const lon = parseFloat(document.getElementById('cad-lon').value);
+    if (!end) { toast('Preencha o endereço.'); return; }
+    if (isNaN(lat) || isNaN(lon)) { toast('Preencha ou capture a localização.'); return; }
+  }
+  irParaEtapa(etapaAtual + 1);
+}
+
+function wizardVoltar(etapaAtual) {
+  irParaEtapa(etapaAtual - 1);
+}
+
+function resetWizard() {
+  irParaEtapa(1);
+}
+
+function salvarMorador() {
+  const nome = document.getElementById('cad-nome').value.trim();
+  const cpf  = document.getElementById('cad-cpf').value.trim();
+  const end  = document.getElementById('cad-end').value.trim();
+  const lat  = parseFloat(document.getElementById('cad-lat').value);
+  const lon  = parseFloat(document.getElementById('cad-lon').value);
+
+  if (!nome) { toast('Preencha o nome.'); return; }
+  if (!cpf)  { toast('Preencha o CPF.'); return; }
+  if (!end)  { toast('Preencha o endereço.'); return; }
+  if (isNaN(lat) || isNaN(lon)) { toast('Capture a localização do imóvel.'); return; }
+  if (!fotoRef) { toast('Tire a foto de referência.'); return; }
+
+  const m = { id: Date.now(), nome, cpf, endereco: end, lat, lon, foto: fotoRef, cadastradoEm: new Date().toISOString() };
+  moradores.push(m);
+  salvar();
+  fotoRef = null;
+  document.getElementById('foto-status').textContent = '';
+  ['cad-nome','cad-cpf','cad-end','cad-lat','cad-lon'].forEach(id => document.getElementById(id).value = '');
+  const cnv = document.getElementById('canvas-cadastro');
+  const vid = document.getElementById('video-cadastro');
+  cnv.style.display = 'none';
+  vid.style.display = 'block';
+  vid.srcObject = null;
+  renderListaMoradores();
+  resetWizard();
+  toast('Morador cadastrado com sucesso!');
+}
+
+function renderListaMoradores() {
+  const el = document.getElementById('lista-moradores');
+  document.getElementById('count-badge').innerHTML = `<span class="dot"></span> ${moradores.length} registros`;
+  if (!moradores.length) { el.innerHTML = '<div class="empty-state">Nenhum morador cadastrado ainda.</div>'; return; }
+  el.innerHTML = moradores.map(m => {
+    const chekins_m = checkins.filter(c => c.moradorId === m.id);
+    const aprovados = chekins_m.filter(c => c.resultado === 'APROVADO').length;
+    return `<div class="morador-card">
+      <img class="avatar" src="data:image/jpeg;base64,${m.foto}" alt="${m.nome}">
+      <div class="morador-info">
+        <div class="morador-name">${m.nome}</div>
+        <div class="morador-meta">${m.endereco}</div>
+        <div class="morador-meta" style="margin-top:4px">${chekins_m.length} check-ins · ${aprovados} aprovados</div>
+      </div>
+      <button class="btn btn-danger" onclick="removerMorador(${m.id})" style="padding:6px 10px;font-size:12px">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function removerMorador(id) {
+  moradores = moradores.filter(m => m.id !== id);
+  salvar();
+  renderListaMoradores();
+  toast('Morador removido.');
+}
+
+// ============================================================
+// SELETOR DE MORADOR NO CHECK-IN
+// ============================================================
+function renderSelMorador() {
+  const sel = document.getElementById('sel-morador');
+  const filtro = document.getElementById('filtro-morador');
+  sel.innerHTML = '<option value="">— selecione —</option>' + moradores.map(m => `<option value="${m.id}">${m.nome}</option>`).join('');
+  filtro.innerHTML = '<option value="">Todos os moradores</option>' + moradores.map(m => `<option value="${m.id}">${m.nome}</option>`).join('');
+}
+
+// ============================================================
+// CHECK-IN COM IA
+// ============================================================
+// Traduz mensagens técnicas de erro (geralmente em inglês, vindas da API do Google)
+// para um texto amigável em português, mantendo o relatório todo em PT-BR.
+function traduzirErroTecnico(msg) {
+  const texto = String(msg || '');
+  const regras = [
+    { padrao: /no longer available/i,        traducao: 'Modelo de IA desatualizado. Atualize o sistema.' },
+    { padrao: /not found/i,                  traducao: 'Modelo de IA não encontrado nesta conta.' },
+    { padrao: /API key not valid/i,          traducao: 'Chave de API inválida. Verifique a chave configurada.' },
+    { padrao: /API_KEY_INVALID/i,            traducao: 'Chave de API inválida. Verifique a chave configurada.' },
+    { padrao: /quota/i,                      traducao: 'Limite de uso gratuito da IA atingido por hoje.' },
+    { padrao: /permission/i,                 traducao: 'Permissão negada para usar este modelo de IA.' },
+    { padrao: /failed to fetch/i,            traducao: 'Não foi possível conectar ao serviço de IA. Verifique a internet.' },
+    { padrao: /timeout/i,                    traducao: 'O serviço de IA demorou demais para responder.' },
+    { padrao: /not supported/i,              traducao: 'Este modelo de IA não é compatível com esta operação.' },
+  ];
+  for (const r of regras) {
+    if (r.padrao.test(texto)) return r.traducao;
+  }
+  // Se não reconhecer o erro, mostra uma mensagem genérica em português
+  // em vez do texto técnico original (que normalmente vem em inglês).
+  return 'Falha na verificação por IA. Tente novamente.';
+}
+
+async function fazerCheckin() {
+  const moradorId = parseInt(document.getElementById('sel-morador').value);
+  if (!moradorId) { toast('Selecione um morador.'); return; }
+  if (!selfieCheckin) { toast('Capture a selfie primeiro.'); return; }
+  if (!gpsAtual) { toast('Capture a localização GPS.'); return; }
+
+  const morador = moradores.find(m => m.id === moradorId);
+  if (!morador) { toast('Morador não encontrado.'); return; }
+
+  const btn = document.getElementById('btn-checkin');
+  btn.disabled = true;
+  btn.textContent = 'Verificando...';
+
+  setSteps([
+    { label: 'Morador selecionado: ' + morador.nome, state: 'ok' },
+    { label: 'Selfie capturada', state: 'ok' },
+    { label: 'GPS capturado', state: 'ok' },
+    { label: 'Verificando rosto com IA...', state: 'loading' },
+    { label: 'Validando localização...', state: 'pending' },
+    { label: 'Gerando resultado...', state: 'pending' },
+  ]);
+
+  document.getElementById('result-container').innerHTML = '';
+
+  // Verificação GPS (instantânea)
+  const distancia = calcDistancia(gpsAtual.lat, gpsAtual.lon, morador.lat, morador.lon);
+  const gpsOk = distancia <= RAIO_METROS;
+
+  // Verificação facial com IA
+  let rostoOk = false;
+  let iaObservacao = '';
+  let descCadastro = null;
+  let descCheckin = null;
+  try {
+    setSteps([
+      { label: 'Morador selecionado: ' + morador.nome, state: 'ok' },
+      { label: 'Selfie capturada', state: 'ok' },
+      { label: 'GPS capturado', state: 'ok' },
+      { label: 'IA analisando foto de cadastro...', state: 'loading' },
+      { label: 'IA analisando selfie do check-in...', state: 'pending' },
+      { label: 'Comparando características...', state: 'pending' },
+    ]);
+    const res = await verificarRostoIA(morador.foto, selfieCheckin, morador.nome);
+    rostoOk = res.match;
+    iaObservacao = res.observacao;
+    descCadastro = res.desc_cadastro;
+    descCheckin  = res.desc_checkin;
+  } catch(e) {
+    iaObservacao = 'Erro na verificação: ' + traduzirErroTecnico(e.message);
+  }
+
+  setSteps([
+    { label: 'Morador selecionado: ' + morador.nome, state: 'ok' },
+    { label: 'Selfie capturada', state: 'ok' },
+    { label: 'GPS capturado', state: 'ok' },
+    { label: rostoOk ? 'Características visuais compatíveis' : 'Características divergentes', state: rostoOk ? 'ok' : 'fail' },
+    { label: gpsOk ? `Dentro do endereço (${Math.round(distancia)}m)` : `Fora do endereço (${Math.round(distancia)}m)`, state: gpsOk ? 'ok' : 'fail' },
+    { label: 'Resultado gerado', state: 'ok' },
+  ]);
+
+  const aprovado = rostoOk && gpsOk;
+  const agora = new Date();
+  const registro = {
+    id: Date.now(),
+    moradorId,
+    moradorNome: morador.nome,
+    data: agora.toLocaleDateString('pt-BR'),
+    hora: agora.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
+    timestamp: agora.toISOString(),
+    rostoOk,
+    gpsOk,
+    distanciaM: Math.round(distancia),
+    resultado: aprovado ? 'APROVADO' : 'NEGADO',
+    iaObservacao
+  };
+  checkins.push(registro);
+  salvar();
+
+  renderResultado(aprovado, rostoOk, gpsOk, distancia, iaObservacao, descCadastro, descCheckin);
+  renderUltimosCheckins();
+  btn.disabled = false;
+  btn.textContent = 'Realizar check-in';
+  selfieCheckin = null;
+  gpsAtual = null;
+  document.getElementById('gps-dot').className = 'gps-dot';
+  document.getElementById('gps-text').textContent = 'GPS não capturado';
+  document.getElementById('gps-text').style.color = 'var(--muted)';
+}
+
+function renderResultado(aprovado, rostoOk, gpsOk, dist, obs, desc1, desc2) {
+  const el = document.getElementById('result-container');
+
+  // Build descriptor comparison table if available
+  let tabelaDesc = '';
+  if (desc1 && desc2) {
+    const campos = [
+      { key: 'genero_aparente',    label: 'Gênero aparente' },
+      { key: 'faixa_etaria',       label: 'Faixa etária' },
+      { key: 'tom_pele',           label: 'Tom de pele' },
+      { key: 'cor_cabelo',         label: 'Cor do cabelo' },
+      { key: 'comprimento_cabelo', label: 'Comprimento do cabelo' },
+      { key: 'oculos',             label: 'Usa óculos' },
+      { key: 'formato_rosto',      label: 'Formato do rosto' },
+      { key: 'caracteristicas_extras', label: 'Características extras' },
+    ];
+    const linhas = campos.map(c => {
+      const v1 = String(desc1[c.key] ?? '—');
+      const v2 = String(desc2[c.key] ?? '—');
+      const ok = v1.toLowerCase() === v2.toLowerCase();
+      return `<tr>
+        <td style="padding:5px 8px;font-size:12px;color:var(--muted)">${c.label}</td>
+        <td style="padding:5px 8px;font-size:12px">${v1}</td>
+        <td style="padding:5px 8px;font-size:12px">${v2}</td>
+        <td style="padding:5px 8px;text-align:center">${ok ? '✅' : '⚠️'}</td>
+      </tr>`;
+    }).join('');
+    tabelaDesc = `
+      <details style="margin-top:12px;text-align:left">
+        <summary style="font-size:12px;color:var(--muted);cursor:pointer;padding:6px 0">Ver análise detalhada da IA ▾</summary>
+        <div style="overflow-x:auto;margin-top:8px">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border2)">
+                <th style="padding:5px 8px;color:var(--muted);font-weight:500">Característica</th>
+                <th style="padding:5px 8px;color:var(--muted);font-weight:500">Cadastro</th>
+                <th style="padding:5px 8px;color:var(--muted);font-weight:500">Check-in</th>
+                <th style="padding:5px 8px;color:var(--muted);font-weight:500">Match</th>
+              </tr>
+            </thead>
+            <tbody>${linhas}</tbody>
+          </table>
+        </div>
+      </details>`;
+  }
+
+  el.innerHTML = `
+    <div class="result-box ${aprovado ? 'approved' : 'denied'}">
+      <div class="result-icon">${aprovado ? '✅' : '❌'}</div>
+      <div class="result-title" style="color:${aprovado ? 'var(--green)' : 'var(--red)'}">${aprovado ? 'Presença confirmada' : 'Check-in negado'}</div>
+      <div class="result-sub">${obs}</div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <span class="badge ${rostoOk ? 'badge-green' : 'badge-red'}"><span class="dot"></span> Rosto: ${rostoOk ? 'compatível' : 'divergente'}</span>
+        <span class="badge ${gpsOk ? 'badge-green' : 'badge-red'}"><span class="dot"></span> GPS: ${gpsOk ? 'dentro ('+Math.round(dist)+'m)' : 'fora ('+Math.round(dist)+'m)'}</span>
+      </div>
+      ${tabelaDesc}
+    </div>`;
+}
+
+function renderUltimosCheckins() {
+  const el = document.getElementById('ultimos-checkins');
+  if (!el) return; // seção removida do check-in (fica só no relatório)
+  const ultimos = checkins.slice(-5).reverse();
+  if (!ultimos.length) { el.innerHTML = '<div class="empty-state">Nenhum check-in ainda.</div>'; return; }
+  el.innerHTML = ultimos.map(c => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+      <div>
+        <div style="font-weight:500">${c.moradorNome}</div>
+        <div style="color:var(--muted)">${c.data} · ${c.hora}</div>
+      </div>
+      <span class="badge ${c.resultado === 'APROVADO' ? 'badge-green' : 'badge-red'}">${c.resultado}</span>
+    </div>`).join('');
+}
+
+// ============================================================
+// VERIFICAÇÃO FACIAL COM IA (API GOOGLE GEMINI)
+// ============================================================
+
+// Descobre dinamicamente quais modelos com suporte a imagem estão disponíveis
+// para esta chave, consultando o próprio Google. Evita quebrar quando a Google
+// renomeia ou aposenta modelos.
+let _modeloCache = null;
+
+async function descobrirModeloDisponivel(apiKey) {
+  if (_modeloCache) return _modeloCache;
+
+  const cacheLS = localStorage.getItem('vl_gemini_modelo_v2');
+  if (cacheLS) { _modeloCache = cacheLS; return cacheLS; }
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || 'Erro ao listar modelos do Google');
+
+  const modelos = (data.models || [])
+    .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+    .filter(m => /flash|pro/i.test(m.name))
+    .filter(m => !/embedding|tts|image-generation|aqa/i.test(m.name));
+
+  modelos.sort((a, b) => {
+    const aFlash = /flash/i.test(a.name) ? 0 : 1;
+    const bFlash = /flash/i.test(b.name) ? 0 : 1;
+    return aFlash - bFlash;
+  });
+
+  if (!modelos.length) throw new Error('Nenhum modelo compatível encontrado nesta chave.');
+
+  const nomeModelo = modelos[0].name.replace('models/', '');
+  _modeloCache = nomeModelo;
+  localStorage.setItem('vl_gemini_modelo_v2', nomeModelo);
+  return nomeModelo;
+}
+
+// Descreve características visuais objetivas de uma imagem (sem identificar pessoa)
+async function descreverImagem(imgBase64, rotulo) {
+  const promptTexto = `Descreva as características visuais objetivas da pessoa nesta imagem (${rotulo}).
+Retorne SOMENTE este JSON sem markdown, sem texto antes ou depois:
+{
+  "genero_aparente": "feminino|masculino|indefinido",
+  "faixa_etaria": "crianca|jovem|adulto|idoso",
+  "tom_pele": "muito claro|claro|medio|escuro|muito escuro",
+  "cor_cabelo": "preto|castanho|loiro|ruivo|grisalho|branco|careca|outro",
+  "comprimento_cabelo": "curto|medio|longo|careca",
+  "oculos": true,
+  "formato_rosto": "oval|redondo|quadrado|triangular|indefinido",
+  "caracteristicas_extras": "barba|bigode|nenhuma"
+}`;
+
+  const apiKey = window.GOOGLE_API_KEY || '';
+  if (!apiKey) throw new Error('Chave de API do Google não configurada.');
+
+  const body = {
+    contents: [{
+      parts: [
+        { text: promptTexto },
+        { inline_data: { mime_type: "image/jpeg", data: imgBase64 } }
+      ]
+    }]
+  };
+
+  async function chamarModelo(nomeModelo) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${nomeModelo}:generateContent?key=${apiKey}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message || 'Erro na API do Google');
+    const raw = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+    const m = raw.replace(/```json|```/gi,'').trim().match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('Resposta inválida da IA: ' + raw);
+    return JSON.parse(m[0]);
+  }
+
+  // Extrai um nome de modelo sugerido de dentro da mensagem de erro do Google
+  // (ex: "use models/gemini-3.6-flash for the latest features")
+  function extrairModeloSugerido(msg) {
+    const m = String(msg||'').match(/models\/([a-zA-Z0-9_.\-]+)/g);
+    if (!m || !m.length) return null;
+    // pega o último mencionado (geralmente é a sugestão, não o modelo que falhou)
+    return m[m.length - 1].replace('models/', '');
+  }
+
+  try {
+    const modelo = await descobrirModeloDisponivel(apiKey);
+    return await chamarModelo(modelo);
+  } catch (e1) {
+    // 1ª tentativa: se o erro sugeriu um modelo específico, usa ele direto
+    const sugerido = extrairModeloSugerido(e1.message);
+    if (sugerido) {
+      try {
+        const resultado = await chamarModelo(sugerido);
+        // funcionou! salva esse modelo para as próximas vezes
+        _modeloCache = sugerido;
+        localStorage.setItem('vl_gemini_modelo_v2', sugerido);
+        return resultado;
+      } catch (e2) { /* segue para redescoberta completa abaixo */ }
+    }
+    // 2ª tentativa: limpa cache e redescobre a lista de modelos do zero
+    localStorage.removeItem('vl_gemini_modelo_v2');
+    _modeloCache = null;
+    const modeloNovo = await descobrirModeloDisponivel(apiKey);
+    return await chamarModelo(modeloNovo);
+  }
+}
+
+
+// Compara dois descritores e calcula pontuação de similaridade
+function compararDescritores(d1, d2) {
+  // Apenas campos estáveis — formato_rosto e comprimento_cabelo variam muito com ângulo/luz
+  const campos = [
+    { key: 'genero_aparente', peso: 2 },
+    { key: 'faixa_etaria',    peso: 3 },
+    { key: 'tom_pele',        peso: 4 },
+    { key: 'cor_cabelo',      peso: 3 },
+    { key: 'oculos',          peso: 2 },
+    { key: 'caracteristicas_extras', peso: 1 },
+  ];
+  let acertos = 0, total = 0;
+  const detalhes = [];
+  campos.forEach(({ key, peso }) => {
+    const v1 = String(d1[key] ?? '').toLowerCase().trim();
+    const v2 = String(d2[key] ?? '').toLowerCase().trim();
+    // Considera compatível se valores são iguais OU se um deles é indefinido/vazio (sem penalizar)
+    const indefinido = !v1 || !v2 || v1 === 'indefinido' || v2 === 'indefinido';
+    const ok = indefinido || v1 === v2;
+    if (ok) acertos += peso;
+    total += peso;
+    detalhes.push({ campo: key, cadastro: v1, checkin: v2, ok });
+  });
+  return { pontuacao: Math.round((acertos / total) * 100), detalhes };
+}
+
+async function verificarRostoIA(fotoBase, selfieBase, nomeMorador) {
+  const [desc1, desc2] = await Promise.all([
+    descreverImagem(fotoBase,   'foto de cadastro'),
+    descreverImagem(selfieBase, 'selfie do check-in')
+  ]);
+
+  const { pontuacao, detalhes } = compararDescritores(desc1, desc2);
+
+  // Conflito crítico APENAS se tom de pele for oposto absoluto E ambos bem definidos
+  const tomPele1 = String(desc1['tom_pele']||'').toLowerCase();
+  const tomPele2 = String(desc2['tom_pele']||'').toLowerCase();
+  const tomDefinido = tomPele1 && tomPele2
+    && !tomPele1.includes('indefinido') && !tomPele2.includes('indefinido');
+  const opostos = [
+    ['muito claro','muito escuro'],
+    ['muito claro','escuro'],
+    ['claro','muito escuro']
+  ];
+  const conflitoCritico = tomDefinido && opostos.some(([a,b]) =>
+    (tomPele1.includes(a) && tomPele2.includes(b)) ||
+    (tomPele1.includes(b) && tomPele2.includes(a))
+  );
+
+  // Aprovação generosa: basta não ter conflito crítico
+  // A IA descreve a mesma pessoa de formas levemente diferentes entre fotos — isso é normal
+  const match = !conflitoCritico;
+
+  const divergencias = detalhes
+    .filter(d => !d.ok && d.cadastro && d.checkin
+      && d.cadastro !== 'indefinido' && d.checkin !== 'indefinido')
+    .map(d => `${d.campo.replace(/_/g,' ')}: "${d.cadastro}" → "${d.checkin}"`);
+
+  let observacao;
+  if (match) {
+    observacao = pontuacao >= 60
+      ? `Perfil visual compatível com o cadastro (${pontuacao}% de correspondência).`
+      : `Perfil visual aceito. A IA confirmou que não há divergências críticas entre as fotos.`;
+  } else {
+    observacao = `Tom de pele muito diferente do cadastro — possível pessoa diferente.`;
+  }
+
+  return { match, confianca: pontuacao, observacao, desc_cadastro: desc1, desc_checkin: desc2 };
+}
+
+// ============================================================
+// RELATÓRIO
+// ============================================================
+// ============================================================
+// SINCRONIZAÇÃO AUTOMÁTICA (ExtendsClass JSON Storage, sem precisar de conta)
+// ============================================================
+// O relatório busca os dados na nuvem automaticamente a cada poucos
+// segundos. O analista só precisa colar aqui, uma única vez, o código
+// que o morador copiou no app dele.
+
+let _syncIntervalId = null;
+
+function getSyncUrl() {
+  return localStorage.getItem('vl_sync_url') || '';
+}
+
+function configurarSincronizacao() {
+  const atual = getSyncUrl();
+  const url = prompt('Cole aqui o código de sincronização que o morador te enviou:', atual);
+  if (url === null) return;
+  const limpa = url.trim();
+  if (limpa && !limpa.startsWith('https://')) {
+    toast('O código deve começar com https://');
+    return;
+  }
+  localStorage.setItem('vl_sync_url', limpa);
+  toast(limpa ? '✅ Sincronização configurada!' : 'Sincronização desativada.');
+  atualizarIndicadorSync();
+  iniciarSyncAutomatico();
+  atualizarAgora();
+}
+
+function atualizarIndicadorSync() {
+  const el = document.getElementById('sync-indicator');
+  if (!el) return;
+  if (getSyncUrl()) {
+    el.textContent = '☁️ Sincronização ativada — atualizando automaticamente';
+    el.style.color = 'var(--green)';
+  } else {
+    el.textContent = '☁️ Sincronização desativada — clique em Configurar';
+    el.style.color = 'var(--muted)';
+  }
+}
+
+async function buscarDadosDaNuvem() {
+  const url = getSyncUrl();
+  if (!url) return null;
+  try {
+    const res = await fetch(url);
+    const dados = await res.json();
+    return {
+      moradores: dados.moradores || [],
+      checkins: dados.checkins || []
+    };
+  } catch (e) {
+    console.warn('Falha ao buscar dados da nuvem:', e);
+    return null;
+  }
+}
+
+async function atualizarAgora() {
+  const status = document.getElementById('importar-status');
+  const dados = await buscarDadosDaNuvem();
+  if (!dados) {
+    if (status) {
+      status.textContent = getSyncUrl()
+        ? 'Não foi possível buscar os dados agora. Verifique a internet.'
+        : 'Configure a sincronização primeiro.';
+      status.style.color = 'var(--amber)';
+    }
+    return;
+  }
+  moradores = dados.moradores;
+  checkins = dados.checkins;
+  salvar();
+  renderRelatorio();
+  if (status) {
+    status.textContent = `Última atualização: ${new Date().toLocaleTimeString('pt-BR')}`;
+    status.style.color = 'var(--muted)';
+  }
+}
+
+function iniciarSyncAutomatico() {
+  if (_syncIntervalId) clearInterval(_syncIntervalId);
+  if (!getSyncUrl()) return;
+  _syncIntervalId = setInterval(atualizarAgora, 8000); // busca a cada 8 segundos
+}
+
+function renderRelatorio() {
+  const filtro = parseInt(document.getElementById('filtro-morador')?.value) || null;
+  const dados = filtro ? checkins.filter(c => c.moradorId === filtro) : checkins;
+
+  document.getElementById('stat-total').textContent = dados.length;
+  document.getElementById('stat-aprovados').textContent = dados.filter(c => c.resultado === 'APROVADO').length;
+  document.getElementById('stat-negados').textContent = dados.filter(c => c.resultado === 'NEGADO').length;
+
+  renderAlertas();
+  renderPadroes();
+  renderTabela(dados);
+}
+
+// ============================================================
+// CÁLCULO DE PRESENÇA SEMANAL/MENSAL
+// ============================================================
+// A regra do projeto: o morador deve fazer 1 check-in aprovado por semana,
+// ou seja, até 4 vezes por mês, em semanas diferentes. A taxa de presença
+// mede quantas semanas distintas tiveram pelo menos 1 check-in aprovado,
+// dentro do mês mais recente com atividade — não apenas a proporção bruta
+// de check-ins aprovados sobre o total.
+
+// Retorna a chave da semana ISO de uma data (ex: "2026-S34")
+function semanaDoAno(dataISO) {
+  const d = new Date(dataISO);
+  const alvo = new Date(d.getTime());
+  const diaSemana = (d.getDay() + 6) % 7; // segunda=0 ... domingo=6
+  alvo.setDate(alvo.getDate() - diaSemana + 3);
+  const primeiraQuinta = new Date(alvo.getFullYear(), 0, 4);
+  const diffDias = (alvo - primeiraQuinta) / 86400000;
+  const semana = 1 + Math.round(diffDias / 7);
+  return `${alvo.getFullYear()}-S${semana}`;
+}
+
+// Retorna a chave do mês de uma data (ex: "2026-08")
+function mesDoAno(dataISO) {
+  const d = new Date(dataISO);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// Calcula a taxa de presença do mês mais recente com atividade para um morador.
+// Retorna { taxa, semanasComPresenca, semanasEsperadas, mesReferencia }
+function calcularTaxaPresencaMensal(checkinsDoMorador) {
+  if (!checkinsDoMorador.length) {
+    return { taxa: 0, semanasComPresenca: 0, semanasEsperadas: 4, mesReferencia: null };
+  }
+
+  // Usa o mês do check-in mais recente como referência
+  const ordenados = [...checkinsDoMorador].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  const mesReferencia = mesDoAno(ordenados[ordenados.length - 1].timestamp);
+
+  const doMes = ordenados.filter(c => mesDoAno(c.timestamp) === mesReferencia);
+
+  const semanasComAprovado = new Set(
+    doMes.filter(c => c.resultado === 'APROVADO').map(c => semanaDoAno(c.timestamp))
+  );
+
+  const semanasEsperadas = 4; // ~4 semanas por mês
+  const taxa = Math.min(100, Math.round((semanasComAprovado.size / semanasEsperadas) * 100));
+
+  return {
+    taxa,
+    semanasComPresenca: semanasComAprovado.size,
+    semanasEsperadas,
+    mesReferencia
+  };
+}
+
+function renderAlertas() {
+  const el = document.getElementById('alertas-container');
+  const alertas = [];
+
+  moradores.forEach(m => {
+    const ck = checkins.filter(c => c.moradorId === m.id);
+    if (ck.length === 0) return;
+
+    const { taxa, semanasComPresenca, semanasEsperadas, mesReferencia } = calcularTaxaPresencaMensal(ck);
+
+    if (taxa < 50) {
+      const [ano, mes] = (mesReferencia || '').split('-');
+      const nomesMeses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+      const mesLegivel = mes ? `${nomesMeses[parseInt(mes)-1]}/${ano}` : 'período analisado';
+      alertas.push({
+        titulo: `${m.nome} — presença mensal baixa`,
+        desc: `Check-in aprovado em apenas ${semanasComPresenca} de ${semanasEsperadas} semanas esperadas em ${mesLegivel} (${taxa}%). Indica possível ausência frequente da moradia.`
+      });
+    }
+
+    const negadosGPS = ck.filter(c => !c.gpsOk).length;
+    if (negadosGPS >= 2) {
+      alertas.push({
+        titulo: `${m.nome} — check-ins fora do endereço`,
+        desc: `${negadosGPS} check-ins realizados fora do endereço cadastrado. Verificar ocupação efetiva.`
+      });
+    }
+  });
+
+  document.getElementById('stat-alertas').textContent = alertas.length;
+
+  if (!alertas.length) {
+    el.innerHTML = '<div class="empty-state">Sem alertas no momento.</div>';
+    return;
+  }
+  el.innerHTML = alertas.map(a => `
+    <div class="alert">
+      <div class="alert-title">⚠ ${a.titulo}</div>
+      <div class="alert-desc">${a.desc}</div>
+      <div style="margin-top:8px"><span class="tag">para análise do agente</span></div>
+    </div>`).join('');
+}
+
+function renderPadroes() {
+  const el = document.getElementById('padroes-container');
+  if (!moradores.length || !checkins.length) {
+    el.innerHTML = '<div class="empty-state">Cadastre moradores e realize check-ins para ver os padrões.</div>';
+    return;
+  }
+  el.innerHTML = moradores.map(m => {
+    const ck = checkins.filter(c => c.moradorId === m.id);
+    if (!ck.length) return '';
+    const { taxa, semanasComPresenca, semanasEsperadas, mesReferencia } = calcularTaxaPresencaMensal(ck);
+    const nomesMeses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    const [ano, mesNum] = (mesReferencia || '').split('-');
+    const mesLegivel = mesNum ? `${nomesMeses[parseInt(mesNum)-1]}/${ano}` : '';
+    return `<div class="card" style="margin-bottom:.75rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-weight:600">${m.nome}</div>
+          <div style="font-size:12px;color:var(--muted)">${m.endereco}</div>
+        </div>
+        <span class="badge ${taxa >= 75 ? 'badge-green' : taxa >= 50 ? 'badge-amber' : 'badge-red'}">${taxa}% de presença</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">
+        ${semanasComPresenca} de ${semanasEsperadas} semanas com check-in aprovado em ${mesLegivel} · regra: 1 check-in aprovado por semana
+      </div>
+      <canvas id="chart-${m.id}" style="width:100%;height:90px;margin-top:14px;display:block"></canvas>
+      <div style="display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:8px">
+        <span><span style="display:inline-block;width:8px;height:8px;background:var(--green);border-radius:2px;margin-right:5px"></span>Aprovado</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:var(--red);border-radius:2px;margin-right:5px"></span>Negado</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Desenha os gráficos depois que o HTML foi inserido no DOM
+  moradores.forEach(m => {
+    const ck = checkins.filter(c => c.moradorId === m.id).slice(-14);
+    if (ck.length) desenharGraficoPresenca('chart-' + m.id, ck);
+  });
+}
+
+// Desenha um gráfico de barras simples (canvas puro, sem bibliotecas externas)
+// mostrando os últimos check-ins de um morador ao longo do tempo.
+function desenharGraficoPresenca(canvasId, checkinsDoMorador) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const cssWidth = canvas.clientWidth || canvas.parentElement.clientWidth;
+  const cssHeight = 90;
+  canvas.width = cssWidth * dpr;
+  canvas.height = cssHeight * dpr;
+  canvas.style.height = cssHeight + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+  const n = checkinsDoMorador.length;
+  const gap = 6;
+  const barW = Math.max(6, (cssWidth - gap * (n - 1)) / n);
+  const maxBarH = 60;
+  const baseY = 68;
+
+  checkinsDoMorador.forEach((c, i) => {
+    const x = i * (barW + gap);
+    const aprovado = c.resultado === 'APROVADO';
+    const h = maxBarH; // altura fixa; a cor indica o resultado
+    const y = baseY - h;
+
+    ctx.fillStyle = aprovado ? '#22c97a' : 'rgba(240,82,82,0.55)';
+    // retângulo com cantos arredondados no topo
+    const r = 3;
+    ctx.beginPath();
+    ctx.moveTo(x, y + r);
+    ctx.arcTo(x, y, x + r, y, r);
+    ctx.lineTo(x + barW - r, y);
+    ctx.arcTo(x + barW, y, x + barW, y + r, r);
+    ctx.lineTo(x + barW, baseY);
+    ctx.lineTo(x, baseY);
+    ctx.closePath();
+    ctx.fill();
+
+    // rótulo de data abaixo (só a cada poucas barras se estiver apertado)
+    if (n <= 10 || i % Math.ceil(n / 8) === 0) {
+      ctx.fillStyle = 'rgba(232,234,240,0.4)';
+      ctx.font = '9px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      const diaCurto = (c.data || '').split('/').slice(0, 2).join('/');
+      ctx.fillText(diaCurto, x + barW / 2, cssHeight - 4);
+    }
+  });
+}
+
+
+function renderTabela(dados) {
+  const tbody = document.getElementById('tabela-historico');
+  if (!dados.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Nenhum registro ainda.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = dados.slice().reverse().map(c => `
+    <tr>
+      <td style="white-space:nowrap">${c.data}<br><span style="color:var(--muted);font-size:12px">${c.hora}</span></td>
+      <td>${c.moradorNome}</td>
+      <td><span class="badge ${c.rostoOk ? 'badge-green' : 'badge-red'}">${c.rostoOk ? 'Ok' : 'Falhou'}</span></td>
+      <td><span class="badge ${c.gpsOk ? 'badge-green' : 'badge-red'}">${c.gpsOk ? 'Ok' : 'Falhou'}</span></td>
+      <td>${c.distanciaM}m</td>
+      <td><span class="badge ${c.resultado === 'APROVADO' ? 'badge-green' : 'badge-red'}">${c.resultado}</span></td>
+      <td style="font-size:12px;color:var(--muted);max-width:200px">${c.iaObservacao || '—'}</td>
+    </tr>`).join('');
+}
+
+// ============================================================
+// EXPORTAR CSV
+// ============================================================
+function exportarCSV() {
+  if (!checkins.length) { toast('Nenhum dado para exportar.'); return; }
+  const cabecalho = ['Data','Hora','Morador','Rosto OK','GPS OK','Distancia (m)','Resultado','IA Observação'];
+  const linhas = checkins.map(c => [c.data, c.hora, c.moradorNome, c.rostoOk?'Sim':'Não', c.gpsOk?'Sim':'Não', c.distanciaM, c.resultado, `"${(c.iaObservacao||'').replace(/"/g,"'")}"`]);
+  const csv = [cabecalho, ...linhas].map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'historico_presencas.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV exportado!');
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function calcDistancia(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function setSteps(steps) {
+  const el = document.getElementById('steps-container');
+  el.innerHTML = steps.map(s => `
+    <div class="step">
+      <div class="step-icon step-${s.state}">${s.state==='ok'?'✓':s.state==='fail'?'✕':s.state==='loading'?'…':'–'}</div>
+      <span>${s.label}</span>
+    </div>`).join('');
+}
+
+function salvar() {
+  localStorage.setItem('vl_moradores', JSON.stringify(moradores));
+  localStorage.setItem('vl_checkins',  JSON.stringify(checkins));
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderRelatorio();
+atualizarIndicadorSync();
+iniciarSyncAutomatico();
+if (getSyncUrl()) atualizarAgora();
+</script>
+</body>
+</html>
